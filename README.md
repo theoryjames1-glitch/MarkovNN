@@ -1,5 +1,32 @@
 # MarkovNN
 
+## 🔑 Key Ideas
+
+1. **Markov states instead of raw inputs**
+
+   * The 4 possible inputs $[0,0], [0,1], [1,0], [1,1]$ are treated as **distinct states** in a Markov chain.
+   * So the input is one-hot encoded into 4 states.
+
+2. **Markov transitions**
+
+   * Each layer is a stochastic transition matrix $P$, with rows summing to 1.
+   * $h_{t+1} = h_t P$.
+
+3. **Stacking + residuals**
+
+   * A single transition is too weak (linear).
+   * By stacking multiple transitions and adding residual connections, we get non-trivial transformations while keeping the Markov property.
+
+4. **Output as probabilities**
+
+   * Final state → output distribution over $[0,1]$.
+   * We supervise with binary cross-entropy against the XOR labels.
+
+---
+
+## 🧩 PyTorch Implementation
+
+```python
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -61,3 +88,15 @@ with torch.no_grad():
     print(model(X).round())
     print("Probabilities:")
     print(model(X))
+```
+
+---
+
+## ✅ What This Achieves
+
+* Inputs are **true states** in a Markov chain (one-hot vectors).
+* Hidden layers are **row-stochastic transitions** (`softmax` rows).
+* Expressivity comes from **multiple layers + residual connections**.
+* Final linear classifier maps the resulting Markov state distribution to XOR output.
+* This converges to correct outputs $[0,1,1,0]$.
+
